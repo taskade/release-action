@@ -41,7 +41,7 @@ inputs:
     default: ''
 runs:
   using: 'node12'
-  main: 'lib/Main.js'
+  main: 'dist/index.js'
 branding:
   icon: 'tag'
   color: 'gray-dark'

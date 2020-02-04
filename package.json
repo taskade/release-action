@@ -6,9 +6,8 @@
   "main": "lib/main.js",
   "scripts": {
     "build": "tsc",
-    "clean": "rm -rf lib/*",
     "debug": "yarn clean && yarn install && yarn build",
-    "release": "yarn clean && yarn install --production && yarn build",
+    "release": "ncc build src/Main.ts",
     "test": "jest"
   },
   "repository": {

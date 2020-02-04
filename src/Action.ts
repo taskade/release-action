@@ -1,7 +1,10 @@
 import { Inputs } from "./Inputs";
+import * as core from '@actions/core';
 import { Releases } from "./Releases";
 import { ArtifactUploader } from "./ArtifactUploader";
 import { ErrorMessage } from "./ErrorMessage";
+
+import { ReposCreateReleaseResponse, ReposUpdateReleaseResponse, ReposListAssetsForReleaseResponseItem } from '@octokit/rest';
 
 export class Action {
     private inputs: Inputs
@@ -15,15 +18,31 @@ export class Action {
     }
 
     async perform() {
-        const uploadUrl = await this.createOrUpdateRelease()
+        const { id: release_id, upload_url } = await this.createOrUpdateRelease()
+
+        const assets = await this.releases.listArtifacts(release_id);
+
+        core.debug(`List of assets: ${assets.data.map(a => `'${a.name}'`).join(',')}`);
 
         const artifacts = this.inputs.artifacts
         if (artifacts.length > 0) {
-            await this.uploader.uploadArtifacts(artifacts, uploadUrl)
+            for (const artifact of artifacts) {
+              core.debug(`Checking if asset '${artifact.name}' exists`);
+                try {
+                  const assetId = assets.data.find(asset => asset.name === artifact.name)?.id;
+                  if (assetId) {
+                    await this.releases.deleteArtifact(assetId);
+                    core.debug(`Deleting '${artifact.name}'`);
+                  }
+                } catch (e) {
+                  core.warning(e);
+                }
+            }
+            await this.uploader.uploadArtifacts(artifacts, upload_url)
         }
     }
 
-    private async createOrUpdateRelease(): Promise<string> {
+    private async createOrUpdateRelease(): Promise<ReposCreateReleaseResponse | ReposUpdateReleaseResponse> {
         if (this.inputs.allowUpdates) {
             try {
                 const getResponse = await this.releases.getByTag(this.inputs.tag)
@@ -40,7 +59,7 @@ export class Action {
         }
     }
 
-    private async updateRelease(id: number): Promise<string> {
+    private async updateRelease(id: number): Promise<ReposUpdateReleaseResponse> {
         const response = await this.releases.update(
             id,
             this.inputs.tag,
@@ -51,7 +70,7 @@ export class Action {
             this.inputs.prerelease
         )
 
-        return response.data.upload_url
+        return response.data
     }
 
     private noPublishedRelease(error: any): boolean {
@@ -59,7 +78,7 @@ export class Action {
         return errorMessage.status == 404
     }
 
-    private async updateDraftOrCreateRelease(): Promise<string> {
+    private async updateDraftOrCreateRelease(): Promise<ReposCreateReleaseResponse | ReposUpdateReleaseResponse> {
         const draftReleaseId = await this.findMatchingDraftReleaseId()
         if (draftReleaseId) {
             return await this.updateRelease(draftReleaseId)
@@ -77,7 +96,7 @@ export class Action {
         return draftRelease?.id
     }
 
-    private async createRelease(): Promise<string> {
+    private async createRelease(): Promise<ReposCreateReleaseResponse> {
         const response = await this.releases.create(
             this.inputs.tag,
             this.inputs.body,
@@ -87,6 +106,6 @@ export class Action {
             this.inputs.prerelease
         )
 
-        return response.data.upload_url
+        return response.data
     }
 }
