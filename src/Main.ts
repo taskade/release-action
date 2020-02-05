@@ -9,24 +9,24 @@ import { ErrorMessage } from './ErrorMessage';
 
 async function run() {
   try {
-    const action = createAction()
-    await action.perform()
+    const action = createAction();
+    await action.perform();
   } catch (error) {
-    const errorMessage = new ErrorMessage(error)
+    const errorMessage = new ErrorMessage(error);
     core.setFailed(errorMessage.toString());
   }
 }
 
 function createAction(): Action {
-  const token = core.getInput('token')
-  const context = github.context
-  const git = new github.GitHub(token)
-  const globber = new FileArtifactGlobber()
+  const token = core.getInput('token');
+  const context = github.context;
+  const git = new github.GitHub(token);
+  const globber = new FileArtifactGlobber();
 
-  const inputs = new CoreInputs(globber, context)
-  const releases = new GithubReleases(context, git)
-  const uploader = new GithubArtifactUploader(releases)
-  return new Action(inputs, releases, uploader)
+  const inputs = new CoreInputs(globber, context);
+  const releases = new GithubReleases(context, git);
+  const uploader = new GithubArtifactUploader(releases);
+  return new Action(inputs, releases, uploader);
 }
 
 run();
