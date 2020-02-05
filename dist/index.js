@@ -3708,7 +3708,7 @@ class ErrorMessage {
     generateGithubErrors() {
         const errors = this.error.errors;
         if (errors instanceof Array) {
-            return errors.map((err) => new GithubError_1.GithubError(err));
+            return errors.map(err => new GithubError_1.GithubError(err));
         }
         else {
             return [];
@@ -3718,7 +3718,7 @@ class ErrorMessage {
         return this.error.status;
     }
     hasErrorWithCode(code) {
-        return this.githubErrors.some((err) => err.code == code);
+        return this.githubErrors.some(err => err.code == code);
     }
     toString() {
         const message = this.error.message;
@@ -3732,7 +3732,7 @@ class ErrorMessage {
         }
     }
     errorBulletedList(errors) {
-        return errors.map((err) => `- ${err}`).join("\n");
+        return errors.map(err => `- ${err}`).join('\n');
     }
 }
 exports.ErrorMessage = ErrorMessage;
@@ -6829,7 +6829,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const path_1 = __webpack_require__(622);
 const fs_1 = __webpack_require__(747);
 class Artifact {
-    constructor(path, contentType = "raw") {
+    constructor(path, contentType = 'raw') {
         this.path = path;
         this.name = path_1.basename(path);
         this.contentType = contentType;
@@ -7388,7 +7388,7 @@ class GithubReleases {
                 prerelease: prerelease,
                 repo: this.context.repo.repo,
                 target_commitish: commitHash,
-                tag_name: tag
+                tag_name: tag,
             });
         });
     }
@@ -7396,7 +7396,7 @@ class GithubReleases {
         return __awaiter(this, void 0, void 0, function* () {
             return this.git.repos.listReleases({
                 owner: this.context.repo.owner,
-                repo: this.context.repo.repo
+                repo: this.context.repo.repo,
             });
         });
     }
@@ -7405,7 +7405,7 @@ class GithubReleases {
             return this.git.repos.getReleaseByTag({
                 owner: this.context.repo.owner,
                 repo: this.context.repo.repo,
-                tag: tag
+                tag: tag,
             });
         });
     }
@@ -7420,7 +7420,7 @@ class GithubReleases {
                 prerelease: prerelease,
                 repo: this.context.repo.repo,
                 target_commitish: commitHash,
-                tag_name: tag
+                tag_name: tag,
             });
         });
     }
@@ -7429,11 +7429,11 @@ class GithubReleases {
             return this.git.repos.uploadReleaseAsset({
                 url: assetUrl,
                 headers: {
-                    "content-length": contentLength,
-                    "content-type": contentType
+                    'content-length': contentLength,
+                    'content-type': contentType,
                 },
                 file: file,
-                name: name
+                name: name,
             });
         });
     }
@@ -7442,7 +7442,7 @@ class GithubReleases {
             return this.git.repos.listAssetsForRelease({
                 release_id: releaseId,
                 owner: this.context.repo.owner,
-                repo: this.context.repo.repo
+                repo: this.context.repo.repo,
             });
         });
     }
@@ -7451,7 +7451,7 @@ class GithubReleases {
             return this.git.repos.deleteReleaseAsset({
                 asset_id: assetId,
                 owner: this.context.repo.owner,
-                repo: this.context.repo.repo
+                repo: this.context.repo.repo,
             });
         });
     }
@@ -9850,7 +9850,7 @@ class GithubError {
             documentationMessage = `\nPlease see ${documentation}.`;
         }
         else {
-            documentationMessage = "";
+            documentationMessage = '';
         }
         return `${message}${documentationMessage}`;
     }
@@ -10796,10 +10796,11 @@ class FileArtifactGlobber {
         this.globber = globber;
     }
     globArtifactString(artifact, contentType) {
-        return artifact.split(',')
-            .map((path) => this.globber.glob(path))
+        return artifact
+            .split(',')
+            .map(path => this.globber.glob(path))
             .reduce((accumulated, current) => accumulated.concat(current))
-            .map((path) => new Artifact_1.Artifact(path, contentType));
+            .map(path => new Artifact_1.Artifact(path, contentType));
     }
 }
 exports.FileArtifactGlobber = FileArtifactGlobber;
@@ -11001,8 +11002,7 @@ class CoreInputs {
             if (!contentType) {
                 contentType = 'raw';
             }
-            return this.artifactGlobber
-                .globArtifactString(artifacts, contentType);
+            return this.artifactGlobber.globArtifactString(artifacts, contentType);
         }
         return [];
     }
@@ -11041,11 +11041,11 @@ class CoreInputs {
             return tag;
         }
         const ref = this.context.ref;
-        const tagPath = "refs/tags/";
+        const tagPath = 'refs/tags/';
         if (ref && ref.startsWith(tagPath)) {
             return ref.substr(tagPath.length, ref.length);
         }
-        throw Error("No tag found in ref or input!");
+        throw Error('No tag found in ref or input!');
     }
     get token() {
         return core.getInput('token', { required: true });
